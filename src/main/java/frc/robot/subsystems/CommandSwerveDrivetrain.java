@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
@@ -155,7 +156,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public Command driveRobotRelative(ChassisSpeeds speed) {
-        return Commands.none();
+        return this.applyRequest(() ->
+        new SwerveRequest.FieldCentric()
+            .withDeadband(1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.1)
+            .withRotationalDeadband(RotationsPerSecond.of(0.75).in(RadiansPerSecond) * 0.1) // Add a 10% deadband
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage).withVelocityX(speed.vxMetersPerSecond)
+            .withVelocityY(speed.vyMetersPerSecond)
+            .withRotationalRate(speed.omegaRadiansPerSecond)
+        );
     }
 
     
