@@ -25,7 +25,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-
+import frc.robot.Telemetry;
+import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -48,6 +49,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private static final double kSimLoopPeriod = 0.004; // 4 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
+
+    private static final Telemetry m_telemetry = new Telemetry(1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond));
 
     private static final SwerveDriveState state = new SwerveDriveState();
 
@@ -141,7 +144,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return state.Pose;
     }
     public void resetPose() {
-        /* does nothing for now */
+        
     }
     public ChassisSpeeds getRobotRelativeSpeeds() {
         return state.Speeds;
@@ -297,6 +300,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     @Override
     public void periodic() {
+
+        m_telemetry.telemeterize(state);
         /*
          * Periodically try to apply the operator perspective.
          * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
