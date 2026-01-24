@@ -52,7 +52,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private static final Telemetry m_telemetry = new Telemetry(1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond));
 
-    private static final SwerveDriveState state = new SwerveDriveState();
+    private SwerveDriveState state = new SwerveDriveState();
+
+    private final SwerveRequest.RobotCentric m_robotCentricRequest = new SwerveRequest.RobotCentric();
+
 
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
@@ -140,15 +143,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * @param modules               Constants for each specific module
      */
 
-     public Pose2d getPose() {
+    public Pose2d getPose() {
         return state.Pose;
     }
+
     public void resetPose() {
         
     }
     public ChassisSpeeds getRobotRelativeSpeeds() {
         return state.Speeds;
     }
+
     public Command driveRobotRelative(ChassisSpeeds speed) {
         return Commands.none();
     }
@@ -163,11 +168,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        
         // Configure AutoBuilder last
         setAutobuilder();
     }
 
     public void setAutobuilder(){
+        this.state = this.getState();
         RobotConfig config = null;
         try{
             config = RobotConfig.fromGUISettings();
@@ -300,7 +307,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     @Override
     public void periodic() {
-
         m_telemetry.telemeterize(state);
         /*
          * Periodically try to apply the operator perspective.
