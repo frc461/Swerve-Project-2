@@ -9,6 +9,7 @@ import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.utility.WheelForceCalculator.Feedforwards;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
@@ -34,6 +35,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.util.DriveFeedforwards;
 
 //
 // import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -53,9 +55,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private static final Telemetry m_telemetry = new Telemetry(1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond));
 
-    private SwerveDriveState state = new SwerveDriveState();
 
     private final SwerveRequest.RobotCentric m_robotCentricRequest = new SwerveRequest.RobotCentric();
+
+    private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
+
 
 
 
@@ -144,27 +148,32 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
      * @param modules               Constants for each specific module
      */
 
-    public Pose2d getPose() {
-        return state.Pose;
-    }
+    // public Pose2d getPose() {
+    //     return this.getState().Pose;
+    // }
 
-    public void resetPose() {
-        
-    }
-    public ChassisSpeeds getRobotRelativeSpeeds() {
-        return state.Speeds;
-    }
+    // public void resetPose(Pose2d pose) {
+    //     this.resetPose(pose);
+    // }
+    // public ChassisSpeeds getRobotRelativeSpeeds() {
+    //     return this.getState().Speeds;
+    // }
 
-    public Command driveRobotRelative(ChassisSpeeds speed) {
-        return this.applyRequest(() ->
-        new SwerveRequest.FieldCentric()
-            .withDeadband(1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.1)
-            .withRotationalDeadband(RotationsPerSecond.of(0.75).in(RadiansPerSecond) * 0.1) // Add a 10% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage).withVelocityX(speed.vxMetersPerSecond)
-            .withVelocityY(speed.vyMetersPerSecond)
-            .withRotationalRate(speed.omegaRadiansPerSecond)
-        );
-    }
+    // public void driveRobotRelative(ChassisSpeeds speed, DriveFeedforwards feedforwards) {
+    //     // return this.applyRequest(() ->
+    //     // new SwerveRequest.FieldCentric()
+    //     //     .withDeadband(1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * 0.1)
+    //     //     .withRotationalDeadband(RotationsPerSecond.of(0.75).in(RadiansPerSecond) * 0.1) // Add a 10% deadband
+    //     //     .withDriveRequestType(DriveRequestType.OpenLoopVoltage).withVelocityX(speed.vxMetersPerSecond)
+    //     //     .withVelocityY(speed.vyMetersPerSecond)
+    //     //     .withRotationalRate(speed.omegaRadiansPerSecond)
+    //     // );
+    //     this.setControl(new SwerveRequest.ApplyRobotSpeeds()
+    //     .withSpeeds(speed)
+    //     .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesX())
+    //     .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesY())
+    //     );
+    // }
 
     
            
@@ -178,45 +187,72 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }
         
         // Configure AutoBuilder last
-        setAutobuilder();
+        configureAutoBuilder();
     }
 
-    public void setAutobuilder(){
-        this.state = this.getState();
-        RobotConfig config = null;
-        try{
-            config = RobotConfig.fromGUISettings();
-        } catch (Exception e) {
-            // Handle exception as needed
-            e.printStackTrace();
+    // public void setAutobuilder(){
+    //     // this.state = this.getState();
+    //     RobotConfig config = null;
+    //     try{
+    //         config = RobotConfig.fromGUISettings();
+    //     } catch (Exception e) {
+    //         // Handle exception as needed
+    //         e.printStackTrace();
             
-        }
-        AutoBuilder.configure(
-                this::getPose, // Robot pose supplier
-                this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
-                this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-                (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
-                new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                        new PIDConstants(1.0, 0.0, 0.0), // Translation PID constants
-                        new PIDConstants(1.0, 0.0, 0.0) // Rotation PID constants
+    //     }
+    //     AutoBuilder.configure(
+    //             this::getPose, // Robot pose supplier
+    //             this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
+    //             this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+    //             (speeds, feedforwards) -> driveRobotRelative(speeds, feedforwards), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+    //             new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
+    //                     new PIDConstants(1.0, 0.0, 0.0), // Translation PID constants
+    //                     new PIDConstants(1.0, 0.0, 0.0) // Rotation PID constants
+    //             ),
+    //             config, // The robot configuration
+    //             () -> {
+    //                 // Boolean supplier that controls when the path will be mirrored for the red alliance
+    //                 // This will flip the path being followed to the red side of the field.
+    //                 // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+    //                 var alliance = DriverStation.getAlliance();
+    //                 if (alliance.isPresent()) {
+    //                     return alliance.get() == DriverStation.Alliance.Red;
+    //                 }
+    //                 return false;
+    //             },
+    //             this // Reference to this subsystem to set requirements
+    //     ); 
+
+    // }
+    private void configureAutoBuilder() {
+        try {
+            var config = RobotConfig.fromGUISettings();
+            AutoBuilder.configure(
+                () -> getState().Pose,   // Supplier of current robot pose
+                this::resetPose,         // Consumer for seeding pose against auto
+                () -> getState().Speeds, // Supplier of current robot speeds
+                // Consumer of ChassisSpeeds and feedforwards to drive the robot
+                (speeds, feedforwards) -> setControl(
+                    m_pathApplyRobotSpeeds.withSpeeds(ChassisSpeeds.discretize(speeds, 0.020))
+                        .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+                        .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
                 ),
-                config, // The robot configuration
-                () -> {
-                    // Boolean supplier that controls when the path will be mirrored for the red alliance
-                    // This will flip the path being followed to the red side of the field.
-                    // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-                    var alliance = DriverStation.getAlliance();
-                    if (alliance.isPresent()) {
-                        return alliance.get() == DriverStation.Alliance.Red;
-                    }
-                    return false;
-                },
-                this // Reference to this subsystem to set requirements
-        ); 
-
+                new PPHolonomicDriveController(
+                    // PID constants for translation
+                    new PIDConstants(10, 0, 0),
+                    // PID constants for rotation
+                    new PIDConstants(7, 0, 0)
+                ),
+                config,
+                // Assume the path needs to be flipped for Red vs Blue, this is normally the case
+                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+                this // Subsystem for requirements
+            );
+        } catch (Exception ex) {
+            DriverStation.reportError("Failed to load PathPlanner config and configure AutoBuilder", ex.getStackTrace());
+        }
     }
-
    
     
 
@@ -244,7 +280,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             startSimThread();
         }
 
-        setAutobuilder();
+        configureAutoBuilder();
     }
 
     /**
@@ -278,7 +314,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             startSimThread();
         }
 
-        setAutobuilder();
+        configureAutoBuilder();
     }
 
     /**
@@ -315,7 +351,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     @Override
     public void periodic() {
-        m_telemetry.telemeterize(state);
+        m_telemetry.telemeterize(this.getState());
         /*
          * Periodically try to apply the operator perspective.
          * If we haven't applied the operator perspective before, then we should apply it regardless of DS state.
