@@ -68,9 +68,13 @@ public class RobotContainer {
         joystick.b().whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
         ));
-        joystick.leftBumper().onTrue(Commands.runOnce(SignalLogger::start));
-        System.out.println("Logging started");
-        joystick.rightBumper().onTrue(Commands.runOnce(SignalLogger::stop));
+
+
+
+        
+        // joystick.leftBumper().onTrue(Commands.runOnce(SignalLogger::start));
+     
+        // joystick.rightBumper().onTrue(Commands.runOnce(SignalLogger::stop));
         
 
 
@@ -80,10 +84,10 @@ public class RobotContainer {
         * Joystick B = dynamic forward
         * Joystick X = dyanmic reverse
         */
-        joystick.y().whileTrue(drivetrain.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        joystick.a().whileTrue(drivetrain.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-        joystick.b().whileTrue(drivetrain.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        joystick.x().whileTrue(drivetrain.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+        // joystick.y().whileTrue(drivetrain.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        // joystick.a().whileTrue(drivetrain.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        // joystick.b().whileTrue(drivetrain.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        // joystick.x().whileTrue(drivetrain.sysIdDynamic(SysIdRoutine.Direction.kReverse));
         // Reset the field-centric heading on left bumper press.
         joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
