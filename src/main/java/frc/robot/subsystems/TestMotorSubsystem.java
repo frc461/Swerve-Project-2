@@ -22,6 +22,14 @@ public class TestMotorSubsystem extends SubsystemBase {
     public Command moveTest(double speed) {
         return runOnce(() -> testMotor.set(speed));
     }
+
+    public Command stopSmallKraken() {
+        return runOnce(() -> smallKrakenMotor.set(0));
+    }
+
+    public Command stopTest() {
+        return runOnce(() -> testMotor.set(0));
+    }
     
     @Override
     public void periodic() {

@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 // import com.pathplanner.lib.path.PathPlannerPath;
 
@@ -47,6 +48,13 @@ public class RobotContainer {
 
     public RobotContainer() {
         configureBindings();
+
+        NamedCommands.registerCommand("moveSmallKrakenForwards", m_testMotorSubsystem.moveSmallKraken(1));
+        NamedCommands.registerCommand("moveTestForwards", m_testMotorSubsystem.moveTest(1));
+        NamedCommands.registerCommand("moveSmallKrakenBackwards", m_testMotorSubsystem.moveSmallKraken(-1));
+        NamedCommands.registerCommand("moveTestBackwards", m_testMotorSubsystem.moveTest(-1));
+        NamedCommands.registerCommand("stopSmallKraken", m_testMotorSubsystem.moveSmallKraken(0));
+        NamedCommands.registerCommand("stopTest", m_testMotorSubsystem.moveTest(0));
     }
 
     private void configureBindings() {
@@ -97,8 +105,11 @@ public class RobotContainer {
 
         drivetrain.registerTelemetry(logger::telemeterize);
 
+        // FOR TESTING PURPOSES (bindings can be overwritten):
         joystick.x().onTrue(m_testMotorSubsystem.moveSmallKraken(0.6767));
+        joystick.x().onFalse(m_testMotorSubsystem.stopSmallKraken());
         joystick.y().onTrue(m_testMotorSubsystem.moveTest(0.6767));
+        joystick.y().onFalse(m_testMotorSubsystem.stopTest());
     }
 
     public Command getAutonomousCommand() {
@@ -119,6 +130,5 @@ public class RobotContainer {
         //     drivetrain.applyRequest(() -> idle)
         // );
         return new PathPlannerAuto("Practice");
-
     }
 }
