@@ -170,10 +170,10 @@ public class TunerConstants {
     private static final Distance kBackRightYPos = Inches.of(-10);
 
     // Small Kraken
-    private static final int SmallKrakenMotorId = 55;
+    public static final int SmallKrakenMotorId = 55;
 
     // Test Motor
-    private static final int TestMotorId = 61;
+    public static final int TestMotorId = 61;
 
 
     public static final SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> FrontLeft =
