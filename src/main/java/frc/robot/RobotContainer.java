@@ -6,6 +6,8 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import frc.robot.subsystems.TestMotorSubsystem;
+
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -40,6 +42,8 @@ public class RobotContainer {
     private final CommandXboxController joystick = new CommandXboxController(0);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+
+    private final TestMotorSubsystem m_testMotorSubsystem = new TestMotorSubsystem();
 
     public RobotContainer() {
         configureBindings();
@@ -92,6 +96,9 @@ public class RobotContainer {
         joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+
+        joystick.x().onTrue(m_testMotorSubsystem.moveSmallKraken(0.6767));
+        joystick.y().onTrue(m_testMotorSubsystem.moveTest(0.6767));
     }
 
     public Command getAutonomousCommand() {
