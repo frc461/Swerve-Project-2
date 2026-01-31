@@ -58,12 +58,6 @@
           "data": {
             "name": "stopSmallKraken"
           }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Spin"
-          }
         }
       ]
     }
