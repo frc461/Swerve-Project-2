@@ -26,6 +26,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 // import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
 
 public class RobotContainer {
     private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -80,8 +81,9 @@ public class RobotContainer {
             point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
         ));
 
-
-
+        
+        joystick.leftBumper().onTrue(new PathPlannerAuto("Spin"));
+        joystick.rightBumper().onTrue(new PathPlannerAuto("Spin"));
         
         // joystick.leftBumper().onTrue(Commands.runOnce(SignalLogger::start));
      
