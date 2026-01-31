@@ -47,14 +47,13 @@ public class RobotContainer {
     private final TestMotorSubsystem m_testMotorSubsystem = new TestMotorSubsystem();
 
     public RobotContainer() {
-        configureBindings();
-
         NamedCommands.registerCommand("moveSmallKrakenForwards", m_testMotorSubsystem.moveSmallKraken(1));
         NamedCommands.registerCommand("moveTestForwards", m_testMotorSubsystem.moveTest(1));
         NamedCommands.registerCommand("moveSmallKrakenBackwards", m_testMotorSubsystem.moveSmallKraken(-1));
         NamedCommands.registerCommand("moveTestBackwards", m_testMotorSubsystem.moveTest(-1));
         NamedCommands.registerCommand("stopSmallKraken", m_testMotorSubsystem.moveSmallKraken(0));
         NamedCommands.registerCommand("stopTest", m_testMotorSubsystem.moveTest(0));
+        configureBindings();
     }
 
     private void configureBindings() {

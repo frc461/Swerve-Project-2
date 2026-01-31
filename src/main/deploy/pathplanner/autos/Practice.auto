@@ -5,9 +5,46 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "Example Path"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "moveTestForwards"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Example Path"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopTest"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "moveSmallKrakenForwards"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 15.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopSmallKraken"
           }
         }
       ]
